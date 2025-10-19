@@ -1,0 +1,511 @@
+{
+  "name": "Credit Card Spend Analysis & Alerts",
+  "nodes": [
+    {
+      "parameters": {
+        "path": "credit-card-tx",
+        "responseMode": "lastNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -576,
+        48
+      ],
+      "id": "761db434-7549-44c3-99fd-337b90ad4c47",
+      "name": "Webhook",
+      "webhookId": "5bd0385c-835a-4540-a439-e0dfc075ab84"
+    },
+    {
+      "parameters": {
+        "mode": "expression",
+        "output": "={{ \n  $json.riskScore <= 30 ? 0 :\n  $json.riskScore <= 60 ? 1 :\n  $json.riskScore <= 90 ? 2 :\n  3\n}}\n"
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.3,
+      "position": [
+        544,
+        16
+      ],
+      "id": "40f812aa-369f-4aa2-8f92-eb1ae1cd3567",
+      "name": "Switch 01 - Risk Routing"
+    },
+    {
+      "parameters": {
+        "sendTo": "aneesahmed.shah@gmail.com",
+        "subject": "Suspicious Transaction Alert ",
+        "emailType": "text",
+        "message": "=A suspicious transaction has been flagged 🚨\n\n📄 Transaction Details:\n- Transaction ID: {{ $('Switch 01 - Risk Routing').item.json.transactionId }}\n- Amount: $  {{ $('Switch 01 - Risk Routing').item.json.amount }}\n- Merchant: {{ $('Switch 01 - Risk Routing').item.json.merchant }}\n- Country: {{ $('Switch 01 - Risk Routing').item.json.country }}\n- Risk Score: {{ $('Switch 01 - Risk Routing').item.json.riskScore }}\n\n👉 [View Transaction](https://internal-dashboard.example.com/txn/{{ $('Switch 01 - Risk Routing').item.json.transactionId }})\n",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        992,
+        48
+      ],
+      "id": "6ad2f1f6-268b-4295-b787-bfc8f1b5f22e",
+      "name": "Notifications-Email Node",
+      "webhookId": "a4f6e051-bd09-4807-905f-950e15119376",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "jXqa38zDEfngyw3f",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "92fc1927-e1d8-4aa1-8ad9-984de46e5c0d",
+              "name": "User ID",
+              "value": "={{$json[\"user_id\"]}}",
+              "type": "string"
+            },
+            {
+              "id": "a68f00a8-305c-4f4f-80d8-b12bf68f9a51",
+              "name": "Amount",
+              "value": "={{ parseFloat($json[\"amount\"]) }}",
+              "type": "string"
+            },
+            {
+              "id": "c43a1785-490c-4f88-9564-7a55d507015d",
+              "name": "Currency",
+              "value": "={{$json[\"currency\"] || \"USD\"}}",
+              "type": "string"
+            },
+            {
+              "id": "10011145-145d-4566-81d9-17469291e87d",
+              "name": "Merchant",
+              "value": "={{$json[\"merchant\"] || \"Unknown\"}}",
+              "type": "string"
+            },
+            {
+              "id": "7845f31c-08d3-4e20-9682-2056a2221403",
+              "name": "Timestamp",
+              "value": "={{$json[\"timestamp\"]}}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -352,
+        -64
+      ],
+      "id": "5050e0ad-5a30-4e4c-9ed0-152cc62a1c18",
+      "name": "Set-Normalization and Mapping"
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "18qXMJJnOa9csA7DkZI30g0pFVcNZtdSD2V8XL7OjI8g",
+          "mode": "list",
+          "cachedResultName": "Credit Card Spend Analysis & Alerts",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/18qXMJJnOa9csA7DkZI30g0pFVcNZtdSD2V8XL7OjI8g/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/18qXMJJnOa9csA7DkZI30g0pFVcNZtdSD2V8XL7OjI8g/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "merchant": "={{ $json.merchant }}",
+            "userId": "={{ $json.userId }}",
+            "transactionId": "={{ $json.transactionId }}",
+            "timestamp": "={{ $json.timestamp }}",
+            "amount": "={{ $json.amount }}",
+            "currency": "={{ $json.currency }}",
+            "category": "={{ $json.category }}",
+            "country": "={{ $json.country }}",
+            "city": "={{ $json.city }}",
+            "cardLast4": "={{ $json.cardLast4 }}",
+            "riskScore": "={{ $json.riskScore }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "userId",
+              "displayName": "userId",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "transactionId",
+              "displayName": "transactionId",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "timestamp",
+              "displayName": "timestamp",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "amount",
+              "displayName": "amount",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "currency",
+              "displayName": "currency",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "merchant",
+              "displayName": "merchant",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "category",
+              "displayName": "category",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "country",
+              "displayName": "country",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "city",
+              "displayName": "city",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "cardLast4",
+              "displayName": "cardLast4",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "riskScore",
+              "displayName": "riskScore",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        320,
+        -64
+      ],
+      "id": "fd4b2544-bd04-41af-a593-e6ff3bbb95f9",
+      "name": "Database-Store Transaction",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "WZKYAY9tUlUDXAFm",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "expression",
+        "output": "={{ \n  Number($json.riskScore) <= 30 ? 0 :\n  Number($json.riskScore) <= 60 ? 1 :\n  Number($json.riskScore) <= 90 ? 2 : 3\n}}\n"
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.3,
+      "position": [
+        320,
+        128
+      ],
+      "id": "501f5289-4735-4aa4-a44b-c7b44cd65734",
+      "name": "Switch-Thresholds"
+    },
+    {
+      "parameters": {
+        "jsCode": "const country = ($json.country || \"\").toLowerCase();\nconst city = ($json.city || \"\").toLowerCase();\nconst currency = ($json.currency || \"\").toUpperCase();\nconst amount = Number($json.amount || 0);\nconst merchant = ($json.merchant || \"\").toLowerCase();  // ✅ declare properly\n\nreturn [\n  {\n    json: {\n      country,\n      city,\n      currency,\n      amount,\n      merchant,\n      timestamp: new Date().toISOString()\n    }\n  }\n];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -128,
+        -64
+      ],
+      "id": "60beddba-a377-4ad8-9f41-8cf92225a1b3",
+      "name": "Function 02 -Category"
+    },
+    {
+      "parameters": {
+        "jsCode": "const data = $json;\n\nreturn [\n  {\n    json: {\n      userId: data.userId || '',\n      transactionId: data.transactionId || '',\n      timestamp: data.timestamp || '',\n      amount: data.amount || '',\n      currency: data.currency || '',\n      merchant: (data.merchant || '').toString(),\n      category: data.category || '',\n      country: data.country || '',\n      city: data.city || '',\n      cardLast4: data.cardLast4 || '',\n      riskScore: data.riskScore || 0\n    }\n  }\n];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -128,
+        160
+      ],
+      "id": "524ea7b2-4e59-4e46-90b9-de99070028a0",
+      "name": "Function 01-Data Validation"
+    },
+    {
+      "parameters": {
+        "jsCode": "const tx = items[0].json;\nconst alerts = [];\n\n// Rule 1: High-value transaction\nif (tx.amount >= 1000) {\n  alerts.push({ type: 'HIGH_VALUE', severity: 'HIGH' });\n}\n\n// Rule 2: Daily limit exceeded (if you've fetched dailyTotal from Sheets or DB)\nif (tx.dailyTotal && tx.dailyTotal >= 2000) {\n  alerts.push({ type: 'DAILY_LIMIT', severity: 'MEDIUM' });\n}\n\n// Rule 3: Rapid spending (optional)\nif (tx.txCountLastHour && tx.txCountLastHour >= 5) {\n  alerts.push({ type: 'VELOCITY', severity: 'MEDIUM' });\n}\n\ntx.alerts = alerts;\ntx.alertRequired = alerts.length > 0;\n\nreturn [{ json: tx }];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        96,
+        160
+      ],
+      "id": "32ed88ec-d23a-480c-9abb-5c35ead7f90b",
+      "name": "Function 3-Checks and alerts"
+    },
+    {
+      "parameters": {
+        "jsCode": "// 📌 This Function Node generates 5–10 dummy credit card transactions per run\n// 💳 Perfect for presentations & testing Google Sheets or alert flows\n\nfunction getRandomItem(arr) {\n  return arr[Math.floor(Math.random() * arr.length)];\n}\n\nconst merchants = [\"Apple Store\", \"Amazon\", \"Starbucks\", \"Nike\", \"Tiffany & Co.\", \"Walmart\", \"Uber\"];\nconst categories = [\"Electronics\", \"Online Retail\", \"Food & Drink\", \"Luxury Goods\", \"Groceries\", \"Transport\"];\nconst countries = [\"United States\", \"United Kingdom\", \"Canada\", \"Germany\", \"Australia\"];\nconst cities = [\"New York\", \"London\", \"Toronto\", \"Berlin\", \"Sydney\"];\n\nconst transactions = [];\nconst numTransactions = Math.floor(Math.random() * 6) + 5; // between 5 and 10\n\nfor (let i = 0; i < numTransactions; i++) {\n  const userId = \"USR-\" + Math.floor(10000 + Math.random() * 90000);\n  const transactionId = \"TXN-\" + Math.floor(100000 + Math.random() * 900000);\n  const timestamp = new Date().toISOString();\n  const amount = Number((Math.random() * 10000).toFixed(2));\n  const currency = \"USD\";\n  const merchant = getRandomItem(merchants);\n  const category = getRandomItem(categories);\n  const country = getRandomItem(countries);\n  const city = getRandomItem(cities);\n  const cardLast4 = String(Math.floor(1000 + Math.random() * 9000));\n  const riskScore = Math.floor(Math.random() * 100);\n\n  transactions.push({\n    json: {\n      userId,\n      transactionId,\n      timestamp,\n      amount,\n      currency,\n      merchant,\n      category,\n      country,\n      city,\n      cardLast4,\n      riskScore\n    }\n  });\n}\n\nreturn transactions;\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        96,
+        -64
+      ],
+      "id": "63a7f5c3-d04a-4942-b63f-5ae332f93450",
+      "name": "Function 4-Dummy data for local host"
+    },
+    {
+      "parameters": {
+        "url": "https://ledgier-unmental-willa.ngrok-free.dev",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        768,
+        48
+      ],
+      "id": "b273e851-4f04-4cc8-b578-0df8def94630",
+      "name": "HTTP Request-Outbound data push"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Set-Normalization and Mapping",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Function 01-Data Validation",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch 01 - Risk Routing": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request-Outbound data push",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "HTTP Request-Outbound data push",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "HTTP Request-Outbound data push",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "HTTP Request-Outbound data push",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set-Normalization and Mapping": {
+      "main": [
+        [
+          {
+            "node": "Function 02 -Category",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Database-Store Transaction": {
+      "main": [
+        [
+          {
+            "node": "Switch 01 - Risk Routing",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch-Thresholds": {
+      "main": [
+        [
+          {
+            "node": "Switch 01 - Risk Routing",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Switch 01 - Risk Routing",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Switch 01 - Risk Routing",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Switch 01 - Risk Routing",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Function 02 -Category": {
+      "main": [
+        [
+          {
+            "node": "Function 4-Dummy data for local host",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Function 01-Data Validation": {
+      "main": [
+        [
+          {
+            "node": "Function 3-Checks and alerts",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Function 3-Checks and alerts": {
+      "main": [
+        [
+          {
+            "node": "Switch-Thresholds",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Function 4-Dummy data for local host": {
+      "main": [
+        [
+          {
+            "node": "Database-Store Transaction",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request-Outbound data push": {
+      "main": [
+        [
+          {
+            "node": "Notifications-Email Node",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "ce87baaa-7869-4d0b-9af9-fb789214bb1a",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "1b35aab958c5ffa9d3a9eb8ec04f35f0612bdfdfba50760aa417239be17ecdc0"
+  },
+  "id": "r33fOnASf9GubLQV",
+  "tags": []
+}
